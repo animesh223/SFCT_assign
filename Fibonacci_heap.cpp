@@ -166,8 +166,9 @@ void FHeap:: fib_insert(int value,int node = 0){
             if (nd == NULL){
             x->left = x;
             x->right = x;
-            node_found->child = x;    
+            node_found->child = x;   
             }
+            
             else{
             x->right = nd;
             x->left = nd->left;
@@ -176,6 +177,7 @@ void FHeap:: fib_insert(int value,int node = 0){
             if(x->key < nd->key)
                 node_found->child = x;
             }
+            node_found->degree++; 
             num_H = num_H + 1;
         }
     return;
@@ -204,187 +206,196 @@ void FHeap:: fib_insert_root(int value){
 }
 */
 
-
 void FHeap:: fib_link(hNode* y, hNode* x){
-(y->left)->right =y->right;
-(y->right)->left= y->left;
+    (y->left)->right =y->right;
+    (y->right)->left= y->left;
 
-if(x->right == x)
-H_min=x;
-y->parent=x;
-if(x->child == NULL)
-{  
-y->left=y;
-y->right=y;
-x->child=y;
-cout<<"Insdie if"<<endl;
-}
-else
-{
+    if(x->right == x)
+        H_min=x;
+    y->parent=x;
+    if(x->child == NULL)
+    {  
+        y->left=y;
+        y->right=y;
+        x->child=y;
+        cout<<"Insdie if"<<endl;
+    }
+    else
+    {   
    
- y->right=x->child->right;
+        y->right=x->child->right;
         y->left=x->child;
         x->child->right->left=y;
         x->child->right=y;
          cout<<"Insdie else"<<endl;
+    }
+    cout<<y->key<<" ";
+    cout<<x->key<<" ";
+    cout << x->child->key << " ";
+    if(x->child != NULL)
+    {
+        if(y->key < (x->child)->key)
+            x->child=y; 
+    }
+//cout<<"child"<< x->child->key << endl;
+    x->degree++;
+    y->mark=false;
+//cout<<"4"<<endl;
 }
-cout<<y->key<<" ";
-cout<<x->key<<" ";
-if(x->child != NULL)
-{
-if(y->key < (x->child)->key)
-x->child=y;
-}
-cout<<"3"<<endl;
-x->degree++;
-y->mark=false;
-cout<<"4"<<endl;
-}
-
-
 
 void FHeap:: consolidated(){
     cout<<"In Consolidate"<<endl;
-float f = (log(num_H)) / (log(2));
-cout<<f<<endl;
-int size= f;
-size=size+1;
-int d;
-hNode *degree[size];
-for(int i=0;i<size;i++)
-degree[i]=NULL;
+    float f = (log(num_H)) / (log(2));
+    int size= f;
+    size=size+1;
+    cout << size << endl;
+    int d;
+    hNode *degree[size];
+    for(int i=0;i<size;i++)
+        degree[i]=NULL;
 
-hNode *x= H_min;
-cout<<H_min->key<<endl;
-hNode *y;
-hNode *z;
-hNode *temp= x;
-cout<<"do"<<endl;
-do
-{
-    temp = temp->right;
-    d= x->degree;
-    cout<<x->key<<" "<<d<<endl;
+    hNode *x= H_min;
+    //cout<<H_min->key<<endl;
+    hNode *y;
+    hNode *z;
+    hNode *temp= x;
+    cout<<"do"<<endl;
+    do
+    {
+        temp = temp->right;
+        d= x->degree;
+        cout<<x->key<<" "<<d<<endl;
     
-    while(degree[d] != NULL)
-    {
-        y= degree[d];
-        if(x->key > y->key)
+        while(degree[d] != NULL)
         {
-            z= x;
-            x=y;
-            y=z;
+            y= degree[d];
+            if(x->key > y->key)
+            {   
+
+                z= x;
+                x=y;
+                y=z;
+            }
+            if(H_min==y)
+                H_min = x;
+            cout<<"Call fib_link"<<endl;
+ 
+            fib_link(y,x);
+            cout<<"Exit fib_link"<<endl;
+            cout << x->degree << endl;
+    //       if(x->right==x)
+    //          H_min=x;
+            degree[d]=NULL;
+            d=d+1;
+            cout<<"Inside while"<<d<<endl;
+        
         }
-        if(y == H_min)
-        H_min = x;
-        cout<<"Call fib_link"<<endl;
-        fib_link(y,x);
-        cout<<"Exit fib_link"<<endl;
-        if(x->right==x)
-        H_min=y;
-        degree[d]=NULL;
-        d=d+1;
-        cout<<"Inside while"<<d<<endl;
-        
+        degree[d] = x;
+        cout<<x->key<<" "<< endl ;
+        x = x->right;
+        cout<<x->key<<"exit ";
+    } while (x != H_min);
+    cout<<"do exit"<<" "<<H_min->key<<endl;
+    H_min= NULL;
+    //cout << degree[0]->key << endl;
+    //cout << degree[2]->key << endl; 
+    //cout << degree[3]->key << endl; 
+    for (int j=0; j < size; j++)
+    {    
+        if(degree[j] != NULL)
+        {   
+        //   cout << degree[j]->key << (degree[j]->child)->key << " mid " << j << " " << endl;
+            degree[j]->left=degree[j];
+            degree[j]->right=degree[j];
+            if (H_min != NULL){
+              (H_min->left)->right = degree[j];
+              degree[j]->right = H_min;
+              degree[j]->left = H_min->left;
+              H_min->left = degree[j];
+              if(degree[j]->key < H_min->key){
+                  H_min=degree[j];
+              }
+          }
+          else{
+              H_min=degree[j];
+          }
+          if (H_min == NULL){
+              H_min=degree[j];
+          }
+          else if (degree[j]->key < H_min->key)
+          {
+              H_min= degree[j];
+          }
+          
+ 
+        }
     }
-    degree[d] = x;
-    cout<<x->key<<" ";
-    x = x->right;
-    cout<<x->key<<"exit ";
-} while (x != H_min);
-cout<<"do exit"<<" "<<H_min->key<<endl;
-H_min= NULL;
-for (int j=0; j < size; j++)
-{
-    if(degree[j] != NULL)
-    {
-        degree[j]->left=degree[j];
-        degree[j]->right=degree[j];
-         if (H_min == NULL)
-      {
-       H_min= degree[j];
-      }
-      else
-      {
-           (H_min->left)->right = degree[j];
-        degree[j]->right = H_min;
-        degree[j]->left = H_min->left;
-        H_min->left = degree[j];
-        if (degree[j]->key < H_min->key)
-          H_min = degree[j];
-        
-      }
-       if (H_min == NULL)
-        H_min= degree[j];
-      else if (degree[j]->key < H_min->key)
-        H_min= degree[j];
-    }
-}
 }
 
 void FHeap:: delete_min(){
-hNode *temp =H_min;
-hNode *store_child=temp;
-hNode *x=NULL;
-cout<<"Min:"<< temp->key<<endl;
+    hNode *temp =H_min;
+    hNode *store_child=temp;
+    hNode *x=NULL;
+    cout<<"Min:"<< temp->key<<endl;
+    //cout<<"Min:"<< x->key<<endl;
+    if(temp->child !=NULL)
+    {
+        x= temp->child;
+        do
+        {
+            //cout<<"C"<<endl;
+            store_child= x->right;
+            (H_min->left)->right= x;
+            x->left= H_min->left;
+            x->right= H_min;
+            H_min->left= x;
+            if(x->key < H_min->key)
+                H_min=x;
+            x=store_child;
+            x->parent=NULL;
+        }while(store_child != temp->child); 
+    }                                       // add all the nodes into the root list
+    cout<<"All childs are added into root list: "<<temp->key<<endl;
+    (temp->right)->left= temp->left;
+    (temp->left)->right= temp->right;       // min is eliminated from the root list
 
-//cout<<"Min:"<< x->key<<endl;
-if(temp->child !=NULL)
-{
-    x= temp->child;
-do
-{
-cout<<"C"<<endl;
-store_child= x->right;
-(H_min->left)->right= x;
-x->left= H_min->left;
-x->right= H_min;
-H_min->left= x;
-if(x->key < H_min->key)
-H_min=x;
-x=store_child;
-x->parent=NULL;
-}while(store_child != temp->child);
-}                                       // add all the nodes into the root list
-cout<<"All childs are added into root list: "<<temp->key<<endl;
-(temp->right)->left= temp->left;
-(temp->left)->right= temp->right;       // min is eliminated from the root list
+    H_min = temp->right;                 
+    cout<<H_min->key;
+    if(temp == temp ->right)               // only root in the list
+    H_min= NULL;
+    else 
+    {
+        cout<<"Call consolidated"<<endl;                           
+        H_min= temp->right;
+        consolidated();
+        cout<<"Exit from consolidate";
+        cout<<H_min->key<<"After Cons";
+    }
 
-H_min = temp->right;                 
-cout<<H_min->key;
-if(temp == temp ->right)               // only root in the list
-H_min= NULL;
-else 
-{
-cout<<"Call consolidated"<<endl;                           
-H_min= temp->right;
-consolidated();
-cout<<"Exit from consolidate";
-cout<<H_min->key<<"After Cons";
-}
+    num_H = num_H - 1;
+    cout<<"Min is deleted:"<<endl;
+    cout<<"min: "<<H_min->key<<endl;
 
-num_H = num_H - 1;
-cout<<"Min is deleted:"<<endl;
-cout<<"min: "<<H_min->key<<endl;
+    cout << (H_min->child)->key << "dd " << endl;
 }
 
 void FHeap:: cut(hNode *node, hNode *parent){
 
-if(node==node->right)
-    parent->child=NULL;
-(node->left)->right = node->right;
-(node->right)->left= node->left;
-if(parent->child == node)
-    parent->child= node->right;
-parent->degree = parent->degree -1;
-node->left= node;
-node->right=node;
-node->right=H_min;
-node->left= H_min->left;
-(H_min->left)->right = node;
-H_min->left =node;
-node->parent = NULL;
-node->mark='B';
+    if(node==node->right)
+        parent->child=NULL;
+    (node->left)->right = node->right;
+    (node->right)->left= node->left;
+    if(parent->child == node)
+        parent->child= node->right;
+    parent->degree = parent->degree -1;
+    node->left= node;
+    node->right=node;
+    node->right=H_min;
+    node->left= H_min->left;
+    (H_min->left)->right = node;
+    H_min->left =node;
+    node->parent = NULL;
+    node->mark='B';
 
 }
 
@@ -432,8 +443,8 @@ void FHeap:: decrease_key(int old_val,int new_val){
     node_index = find_node(old_value,H_min,H_min,node_found);
     if(H_min==NULL)
     {
-    cout<<"Heap is empty"<<endl;
-    return ;
+        cout<<"Heap is empty"<<endl;
+        return ;
     }
 
     else if(node_index == NULL)
@@ -556,7 +567,7 @@ void FHeap:: print(hNode *temp,hNode *tempa){
 
 // to get the minimum element in the heap
 int FHeap:: find_min(){
-    return H_min->key;
+    return H_min->degree;
 };
 
 int FHeap:: find_num(){
@@ -585,6 +596,10 @@ int main()
     fh.decrease_key(12,11);
     fh.print();
     fh.decrease_key(13,12);
+    fh.print();
+    fh.delete_min();
+    fh.print();
+    fh.delete_min();
     fh.print();
     cout<<fh.find_min();
     cout<<"\n"<<fh.find_num();
