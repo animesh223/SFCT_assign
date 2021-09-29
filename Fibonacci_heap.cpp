@@ -207,7 +207,7 @@ void FHeap:: fib_insert_root(int value){
 }
 */
 
-void FHeap:: fib_link(hNode* y, hNode* x){
+void FHeap:: fib_link(hNode* x, hNode* y){
     (y->left)->right =y->right;
     (y->right)->left= y->left;
 
@@ -219,135 +219,146 @@ void FHeap:: fib_link(hNode* y, hNode* x){
         y->left=y;
         y->right=y;
         x->child=y;
-//        cout<<"Insdie if"<<endl;
     }
     else
     {   
-   
+        
         y->right=x->child->right;
         y->left=x->child;
         x->child->right->left=y;
         x->child->right=y;
-  //       cout<<"Insdie else"<<endl;
+
     }
- //   cout<<y->key<<" ";
- //   cout<<x->key<<" ";
- //   cout << x->child->key << " ";
     if(x->child != NULL)
     {
         if(y->key < (x->child)->key)
             x->child=y; 
     }
-//cout<<"child"<< x->child->key << endl;
+
     x->degree++;
     y->mark=false;
 //cout<<"4"<<endl;
+/*
+   temp1->left->right=temp1->right;     //unlink temp1 from root nodes
+    temp1->right->left=temp1->left;
+    if(temp2->right==temp2)
+        H_min=temp2;
+    temp1->parent=temp2;                     //make parent of temp1=temp2
+    if(temp2->child==NULL)                 //if temp2 child is NULL
+    {
+        temp2->child=temp1;
+        temp1->left=temp1;
+        temp1->right=temp1;
+    }
+    else
+    {
+        temp1->right=temp2->child->right;
+        temp1->left=temp2->child;
+        temp2->child->right->left=temp1;
+        temp2->child->right=temp1;
+    }                                           //else
+    //if (temp1->key < (temp2->child)->key)
+    //    temp2->child = temp1;
+    temp1->mark='W';
+    temp2->degree++;
+*/
 }
 
 void FHeap:: consolidated(){
- //   cout<<"In Consolidate"<<endl;
-    float f = (log(num_H)) / (log(2));
-    int size= f;
-    size=size+2;
-//    cout << size << endl;
-    int d;
-    hNode *degree[size];
-    for(int i=0;i<size;i++)
-        degree[i]=NULL;
+  /*  
+   int i;
+    float max_size=(log(num_H)) / (log(2));
+    int array_size = max_size;
+    hNode* arr[array_size+1];
+    for(int i=0;i <= array_size;i++)
+        arr[i]=NULL;
+    hNode* ptr1 = H_min;
+    while(arr[ptr1->degree] != ptr1)
+    {
+        if(H_min->key > ptr1->key)      
+            H_min=ptr1;
+        if(arr[ptr1->degree]==NULL)   
+        {
+            arr[ptr1->degree]=ptr1;
+            ptr1 = ptr1->right;
+        }
+        else                     
+        {
+            if((arr[ptr1->degree]->key) > (ptr1->key))
+            {
+                if(arr[ptr1->degree]==H_min)
+                    H_min=ptr1;
+                i=ptr1->degree;
+                fib_link(arr[ptr1->degree],ptr1);
+                arr[i]=NULL;
+            }
+            else if((arr[ptr1->degree]->key) < (ptr1->key))
+            {
+                if(ptr1==H_min)
+                    H_min=arr[ptr1->degree];
+                i=ptr1->degree;
+                fib_link(ptr1,arr[ptr1->degree]);
+                ptr1=arr[ptr1->degree];
+                arr[i]=NULL ;
+            }
+        }
 
-    hNode *x= H_min;
-    //cout<<H_min->key<<endl;
-    hNode *y;
-    hNode *z;
-    hNode *temp= x;
-//    cout<<"do"<<endl;
+    }
+    }
+
+*/
+    int i;
+    float max_size=(log(num_H)) / (log(2));
+    int array_size = max_size;
+    hNode* arr[array_size+1];
+    for(int i=0;i<=array_size;i++)
+        arr[i]=NULL;
+    hNode* ptr1=H_min;
     do
     {
-        temp = temp->right;
-        d= x->degree;
-//        cout<<x->key<<" "<<d<<endl;
-    
-        while(degree[d] != NULL)
+        if(H_min->key > ptr1->key)      //update minimum
+            H_min=ptr1;
+        if(arr[ptr1->degree]==NULL)   //check empty
         {
-            y= degree[d];
-            if(x->key > y->key)
-            {   
-
-                z= x;
-                x=y;
-                y=z;
+            arr[ptr1->degree]=ptr1;
+            ptr1=ptr1->right;
+        }
+        else                     //union
+        {
+            if((arr[ptr1->degree]->key) > (ptr1->key))
+            {
+                if(arr[ptr1->degree]==H_min)
+                    H_min=ptr1;
+                i=ptr1->degree;
+                fib_link(arr[ptr1->degree],ptr1);
+                arr[i]=NULL;
             }
-            if(H_min==y)
-                H_min = x;
-//            cout<<"Call fib_link"<<endl;
- 
-            fib_link(y,x);
-//            cout<<"Exit fib_link"<<endl;
- //           cout << x->degree << endl;
-           if(x->right==x)
-              H_min=x;
-            degree[d]=NULL;
-            d=d+1;
-//            cout<<"Inside while"<<d<<endl;
-        
+            else if((arr[ptr1->degree]->key) < (ptr1->key))
+            {
+                if(ptr1==H_min)
+                    H_min=arr[ptr1->degree];
+                i=ptr1->degree;
+                fib_link(ptr1,arr[ptr1->degree]);
+                ptr1=arr[ptr1->degree];
+                arr[i]=NULL;
+            }
         }
-        degree[d] = x;
- //       cout<<x->key<<" "<< endl ;
-        x = x->right;
-//        cout<<x->key<<"exit ";
-    } while (x != H_min);
-//    cout<<"do exit"<<" "<<H_min->key<<endl;
-    H_min= NULL;
-    //cout << degree[0]->key << endl;
-    //cout << degree[2]->key << endl; 
-    //cout << degree[3]->key << endl; 
-    for (int j=0; j < size; j++)
-    {    
-        if(degree[j] != NULL)
-        {   
-        //   cout << degree[j]->key << (degree[j]->child)->key << " mid " << j << " " << endl;
-            degree[j]->left=degree[j];
-            degree[j]->right=degree[j];
-            if (H_min != NULL){
-//                cout << "if1" << endl;
-              (H_min->left)->right = degree[j];
-              degree[j]->right = H_min;
-              degree[j]->left = H_min->left;
-              H_min->left = degree[j];
-              if(degree[j]->key < H_min->key){
-                  H_min=degree[j];
-              }
-          }
-          else{
-//              cout << "else1" << endl;
-              H_min=degree[j];
-          }
- //         if (H_min == NULL){
- //             H_min=degree[j];
- //         }
-          if (degree[j]->key < H_min->key)
-          {
-              H_min= degree[j];
-              cout << "elseif1" << endl;
-          }
-          
- 
-        }
-    }
+
+    }while(arr[ptr1->degree]!=ptr1);
 }
 
+
 void FHeap:: delete_min(){
-    hNode *temp =H_min;
+hNode *temp =H_min;
     hNode *store_child=temp;
     hNode *x=NULL;
-    cout<<"Current Min:"<< H_min->key<<endl;
-    //cout<<"Min:"<< x->key<<endl;
+    cout << "Current Min:"<< H_min->key<<endl;
     if(temp->child !=NULL)
     {
         x= temp->child;
         do
         {
-            //cout<<"C"<<endl;
+    
             store_child= x->right;
             (H_min->left)->right= x;
             x->left= H_min->left;
@@ -359,35 +370,26 @@ void FHeap:: delete_min(){
             x->parent=NULL;
         }while(store_child != temp->child); 
     }                                       // add all the nodes into the root list
- //   cout<<"All childs are added into root list: "<<temp->key<<endl;
+
     (temp->right)->left= temp->left;
     (temp->left)->right= temp->right;       // min is eliminated from the root list
 
     H_min = temp->right;                 
- //   cout<<H_min->key << endl;
+
     if(temp == temp ->right) {              // only root in the list
- //       cout << "i am fault";
         H_min= NULL;
     }
     else 
     {
-     //   cout<<"Call consolidated"<<endl;                           
+                          
         H_min= temp->right;
         consolidated();
-    //    cout<<"Exit from consolidate";
-   //     cout<<H_min->key<<"After Cons";
     }
 
     num_H = num_H - 1;
     cout<<"Min is deleted."<<endl;
-/*    if(H_min==NULL){
-        cout << "HELP";
-    }
-*/
    cout<<"New min: "<<H_min->key<<endl;
-
- //   cout << (H_min->child)->key << "dd " << endl;
-  //  free(temp);
+    free(temp);
 
 }
 
@@ -597,6 +599,25 @@ int main()
 {
     FHeap fh;
     //Roots
+        fh.fib_insert(2);
+    // fh.fib_insert(7,2);
+    // fh.fib_insert(8,2);
+    fh.fib_insert(3);
+    fh.fib_insert(4);
+    fh.fib_insert(5);
+    fh.fib_insert(6);
+    //Childs
+    fh.fib_insert(7,2);
+    fh.fib_insert(8,2);
+    fh.fib_insert(9,2);
+    fh.fib_insert(13,7);
+    fh.fib_insert(14,7);
+    fh.fib_insert(10,4);
+    fh.fib_insert(11,4);
+    fh.fib_insert(12,5);
+    fh.fib_insert(100);
+
+/*
    fh.fib_insert(1);
     fh.fib_insert(2);
     fh.fib_insert(3);
@@ -616,11 +637,11 @@ int main()
     fh.fib_insert(13,4);
     fh.fib_insert(16,4);
     fh.fib_insert(15,5);
-    
+  */  
     cout << "All nodes : ";
     fh.print();
     cout << endl;
-
+/*
     cout << "Decreasing key 13 to 10 : " << endl ;
     fh.decrease_key(13,10);
     fh.print();
@@ -630,15 +651,26 @@ int main()
     fh.decrease_key(14,11);
     fh.print();
     cout << endl;
+*/
+    cout << "Deleting minimum : " << endl;
+    fh.delete_min();
+    fh.print();
+    cout << endl;
+    
+    cout << "Deleting minimum : " << endl;
+    fh.delete_min();
+    fh.print();
+    cout << endl;
 
     cout << "Deleting minimum : " << endl;
     fh.delete_min();
     fh.print();
     cout << endl;
 
-    
-
-    
+    cout << "Deleting minimum : " << endl;
+    fh.delete_min();
+  //  fh.print();
+    cout << endl;
 /*for (int i=6;i<15; i++){
     int k=fh.find_deg(i);
 
