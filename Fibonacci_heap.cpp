@@ -120,14 +120,14 @@ public:
     void fib_link(hNode*, hNode*); 
     void consolidated();
     void delete_min();  
-    void cut(hNode*, hNode*); //to cut (kashish(1))(+)
-    void cascade_cut(hNode*); //to cut (kashish(1))(+)
-    hNode* find_node(int value, hNode* ,hNode*,hNode*); //to find a node with particular key value (Kashish(2))(+)
-    void decrease_key(int old_value,int new_value); //to decrease a particular key (Kashish(3))(+)
-    void print();// to display th fibonacci heap (Animesh(2))(+)
-    int find_min(); //to find the minimum element (Done)(+)
-    void print(hNode *,hNode *);//(+)
-    int find_num();//(+)
+    void cut(hNode*, hNode*); //to cut 
+    void cascade_cut(hNode*); //to cut
+    hNode* find_node(int value, hNode* ,hNode*,hNode*); //to find a node with particular key value 
+    void decrease_key(int old_value,int new_value); //to decrease a particular key 
+    void print();// to display th fibonacci heap 
+    int find_min(); //to find the minimum element 
+    void print(hNode *,hNode *);//
+    int find_num();//
     int find_deg(int);
 };
 
@@ -184,99 +184,101 @@ void FHeap:: fib_insert(int value,int node = 0){
 
 }
 
+//To make x parent of y
 void FHeap:: fib_link(hNode* y, hNode* x){
 
-    (y->left)->right =y->right;
+    (y->left)->right =y->right;               //remove y from the root list.
     (y->right)->left= y->left;
 
-    if(x->right == x)
+    if(x->right == x)                   //check if x is the only root node
         H_min=x;
 
-    y->parent=x;
+    y->parent=x;                    //assign x as parent of y.
 
-    if(x->child == NULL)
+    if(x->child == NULL)         //check if x already has child or not it no make y as the first child.
     {  
         y->left=y;
         y->right=y;
         x->child=y;
     }
 
-    else
+    else                       //if x has children add y in the child list.
     {   
         y->right=x->child;
         y->left=x->child->left;
         x->child->left->right=y;
         x->child->left=y;
-        if(x->child->key > y->key)
+        if(x->child->key > y->key)       //if y is smallest in the child list make x's child pointer to y
             x->child = y;
     }
 
-    x->degree++;
+    x->degree++;           //increase degree of x.
     y->mark = 'W';
 }
 
+//To avoid having 2 nodes with same degree in root list
 void FHeap:: consolidated(){
     int i;
-    float max=num_H/2;
-    int array_size = max;
-    hNode* arr[array_size+1];
-    for(int i=0;i <= array_size;i++)
+    float max=num_H/2;                     //declaring size of auxillary array
+    int array_size = max;                     
+    hNode* arr[array_size+1];              
+    for(int i=0;i <= array_size;i++)        //initializing array elements to NULL
         arr[i]=NULL;
     hNode* ptr1 = H_min;
-    while(arr[ptr1->degree] != ptr1)
+    while(arr[ptr1->degree] != ptr1)         //Run till we get circled back to the first node.
     {   
-        if(H_min->key > ptr1->key)      
+        if(H_min->key > ptr1->key)             //If the current node is smaller than minimum make it minimum
             H_min=ptr1;
-        if(arr[ptr1->degree]==NULL)   
+        if(arr[ptr1->degree]==NULL)           //if the index is NULL make it ptr1
         {    
             arr[ptr1->degree]=ptr1;
             ptr1 = ptr1->right;
 
         }
-        else                     
-        {
-            if((arr[ptr1->degree]->key) > (ptr1->key))
-            {
-                if(arr[ptr1->degree]==H_min)
+        else                                                
+        {  
+            if((arr[ptr1->degree]->key) > (ptr1->key))     //if some node is already present at index check whether it is smaller
+            {                                              // make the greater node chil of smaller node.
+                if(arr[ptr1->degree]==H_min)            
                     H_min=ptr1;
                 i=ptr1->degree;
                 fib_link(arr[ptr1->degree],ptr1);
-                arr[i]=NULL;
             }
-            else if((arr[ptr1->degree]->key) < (ptr1->key))
+            else if((arr[ptr1->degree]->key) < (ptr1->key))  
             {
                 if(ptr1==H_min)
                     H_min=arr[ptr1->degree];
                 i=ptr1->degree;
                 fib_link(ptr1,arr[ptr1->degree]);
-                ptr1=arr[ptr1->degree];
-                arr[i]=NULL;
+                ptr1=arr[ptr1->degree];                //now since the ptr1 has become child make it point to the parent.
             }
+             arr[i]=NULL;                         //As the degree has changed make the current degree index NULL.
         }
 
     };
 }
 
+//To delete the minimum element from the heap
 void FHeap:: delete_min(){
-    if(H_min != NULL){
+    if(H_min != NULL){                     //check if heap is empty or not
     int val;
-    hNode *head = H_min->child;
+    hNode *head = H_min->child;               //point head to the child of minimum
     hNode *temp = head;
     hNode *tempo = H_min;
     H_min = H_min->right;
 
-    if(head != NULL)
+    if(head != NULL)                     //if the minimus has child
     {
         Queue q;
         temp->parent = NULL;
         q.enqueue(temp);
-        while(temp->right != head)
+        while(temp->right != head)       //take all the child and put them inside queue
         {
             temp = temp->right;
             temp->parent = NULL;
             q.enqueue(temp);
         }
-        while(q.isempty() != true){
+        while(q.isempty() != true){      //empty the queue and addd the childs to the root list.
             temp = q.dequeue();
             temp->right = H_min;
             temp->left = H_min->left;
@@ -289,7 +291,7 @@ void FHeap:: delete_min(){
     }  
 
     val = tempo->key;
-    if(tempo == tempo->right){
+    if(tempo == tempo->right){          //check if it is the last node of the heap.
         H_min = NULL;
         num_H = num_H - 1;
         free(tempo);
@@ -297,16 +299,16 @@ void FHeap:: delete_min(){
         return;
     }  
 
-    tempo->left->right = tempo->right;
+    tempo->left->right = tempo->right;        //remove minimum from the root list.
     tempo->right->left = tempo->left;
     tempo->child = NULL;
-    H_min=tempo->right;
+    H_min=tempo->right;                    
     tempo->left = tempo->right = NULL;
     val = tempo->key;
     
 
     if(H_min != NULL){
-        consolidated();
+        consolidated();             //call consolidate to reorganize heap
     }
     free(tempo);
     num_H = num_H - 1;
@@ -456,6 +458,8 @@ int main()
     fh.fib_insert(110,30);
     fh.fib_insert(120,30);
     fh.fib_insert(130,50);
+    fh.fib_insert(150,50);
+    fh.fib_insert(210,40);
     fh.print();
     fh.delete_min();
     fh.print();
@@ -464,6 +468,16 @@ int main()
     fh.delete_min();
     fh.print();
        fh.delete_min();
+    fh.print();
+           fh.delete_min();
+    fh.print();
+           fh.delete_min();
+    fh.print();
+          fh.delete_min();
+    fh.print();
+           fh.delete_min();
+    fh.print();
+           fh.delete_min();
     fh.print();
  
 }
