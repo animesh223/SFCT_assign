@@ -78,32 +78,6 @@ public:
             else
                 return false;
         }
-        void insert(hNode *node,int pos){
-            qNode *temp = new qNode(node);
-            qNode *q = front;
-            int p = 0;
-            if(q == NULL){
-                front = temp;
-                rear = temp;
-                num++;
-                return;
-            }
-            if(pos == 0){
-                temp->next = front;
-                front = temp;
-                num++;
-                return;
-            }
-            while(p!=(pos-1)){
-                q = q->next;
-                p++;
-            }
-            temp->next = q->next;
-            q->next = temp;
-            if(temp->next==NULL)
-                rear = temp;
-            num++;
-        }
 };
 
 // Class of Fibonacci heap
@@ -120,20 +94,19 @@ public:
     void fib_link(hNode*, hNode*); 
     void consolidated();
     void delete_min();  
-    void cut(hNode*, hNode*); //to cut (kashish(1))(+)
-    void cascade_cut(hNode*); //to cut (kashish(1))(+)
-    hNode* find_node(int value, hNode* ,hNode*,hNode*); //to find a node with particular key value (Kashish(2))(+)
-    void decrease_key(int old_value,int new_value); //to decrease a particular key (Kashish(3))(+)
-    void print();// to display th fibonacci heap (Animesh(2))(+)
-    int find_min(); //to find the minimum element (Done)(+)
-    void print(hNode *,hNode *);//(+)
-    int find_num();//(+)
+    void cut(hNode*, hNode*); 
+    void cascade_cut(hNode*); 
+    hNode* find_node(int value, hNode* ,hNode*,hNode*); 
+    void decrease_key(int old_value,int new_value); 
+    void print();
+    void print(hNode *,hNode *);
+    int find_min(); 
+    int find_num();
     int find_deg(int);
 };
 
 //insert in fibonacci heap
 void FHeap:: fib_insert(int value,int node = 0){
-
     if(node == 0){
         hNode *x = new hNode;
         x->key = value;
@@ -153,7 +126,6 @@ void FHeap:: fib_insert(int value,int node = 0){
     num_H = num_H + 1;
     return;
     }
-
     if(node != 0){
         hNode *node_found = NULL;
         node_found = find_node(node,H_min,H_min,node_found);
@@ -167,7 +139,6 @@ void FHeap:: fib_insert(int value,int node = 0){
             x->right = x;
             node_found->child = x;   
             }
-            
             else{
             x->right = nd;
             x->left = nd->left;
@@ -185,22 +156,17 @@ void FHeap:: fib_insert(int value,int node = 0){
 }
 
 void FHeap:: fib_link(hNode* y, hNode* x){
-
     (y->left)->right =y->right;
     (y->right)->left= y->left;
-
     if(x->right == x)
         H_min=x;
-
     y->parent=x;
-
     if(x->child == NULL)
     {  
         y->left=y;
         y->right=y;
         x->child=y;
     }
-
     else
     {   
         y->right=x->child;
@@ -210,46 +176,45 @@ void FHeap:: fib_link(hNode* y, hNode* x){
         if(x->child->key > y->key)
             x->child = y;
     }
-
     x->degree++;
     y->mark = 'W';
 }
 
 void FHeap:: consolidated(){
     int i;
-    float max_size=(log(num_H)) / (log(2));
-    int array_size = max_size;
-    hNode* arr[array_size+1];
-    for(int i=0;i <= array_size;i++)
-        arr[i]=NULL;
-    hNode* ptr1 = H_min;
-    while(arr[ptr1->degree] != ptr1)
+    float size=(log(num_H)) / (log(2));
+    int int_size = size+1;
+    hNode* D[int_size+1];
+    for(int i=0;i <= int_size;i++)
+        D[i]=NULL;
+    hNode* p = H_min;
+    while(D[p->degree] != p)
     {
-        if(H_min->key > ptr1->key)      
-            H_min=ptr1;
-        if(arr[ptr1->degree]==NULL)   
+        if(H_min->key > p->key)      
+            H_min=p;
+        if(D[p->degree]==NULL)   
         {
-            arr[ptr1->degree]=ptr1;
-            ptr1 = ptr1->right;
+            D[p->degree]=p;
+            p = p->right;
         }
         else                     
         {
-            if((arr[ptr1->degree]->key) > (ptr1->key))
+            if((D[p->degree]->key) > (p->key))
             {
-                if(arr[ptr1->degree]==H_min)
-                    H_min=ptr1;
-                i=ptr1->degree;
-                fib_link(arr[ptr1->degree],ptr1);
-                arr[i]=NULL;
+                if(D[p->degree]==H_min)
+                    H_min=p;
+                i=p->degree;
+                fib_link(D[p->degree],p);
+                D[i]=NULL;
             }
-            else if((arr[ptr1->degree]->key) < (ptr1->key))
+            else if((D[p->degree]->key) < (p->key))
             {
-                if(ptr1==H_min)
-                    H_min=arr[ptr1->degree];
-                i=ptr1->degree;
-                fib_link(ptr1,arr[ptr1->degree]);
-                ptr1=arr[ptr1->degree];
-                arr[i]=NULL;
+                if(p==H_min)
+                    H_min=D[p->degree];
+                i=p->degree;
+                fib_link(p,D[p->degree]);
+                p=D[p->degree];
+                D[i]=NULL;
             }
         }
 
@@ -276,33 +241,38 @@ void FHeap:: delete_min(){
         }
         while(q.isempty() != true){
             temp = q.dequeue();
+            if(H_min->right == H_min){
+                temp->right = H_min;
+                temp->left = H_min->left;
+                (H_min->left)->right = temp;
+                H_min->left = temp;
+                H_min = temp;
+            }
+            else{
             temp->right = H_min;
             temp->left = H_min->left;
             (H_min->left)->right = temp;
             H_min->left = temp;
-            if(H_min->right != H_min)
             if(H_min->key > temp->key)
                 H_min = temp;
+            }
         }
     }  
 
     val = tempo->key;
-
     if(tempo == tempo->right){
         H_min = NULL;
         num_H = num_H - 1;
         free(tempo);
         cout<<"Deleted value is "<<val<<endl;
         return;
-    }  
-
+    } 
     tempo->left->right = tempo->right;
     tempo->right->left = tempo->left;
     tempo->child = NULL;
     tempo->left = tempo->right = NULL;
-    val = tempo->key;
     free(tempo);
-    //consolidated();
+    consolidated();
     num_H = num_H - 1;
     cout<<"Deleted value is "<<val<<endl;
     }
@@ -443,6 +413,10 @@ int main()
     fh.fib_insert(30);
     fh.fib_insert(40);
     fh.fib_insert(50);
+    fh.fib_insert(60);
+    fh.fib_insert(70);
+    fh.fib_insert(80);
+    fh.fib_insert(90);
     //Childs
     fh.fib_insert(100,20);
     fh.fib_insert(200,20);
@@ -451,7 +425,11 @@ int main()
     fh.fib_insert(120,30);
     fh.fib_insert(130,30);
     fh.print();
+    fh.decrease_key(130,1);
+    fh.print();
     fh.delete_min();
+    fh.print();
+    fh.decrease_key(120,4);
     fh.print();
     fh.delete_min();
     fh.print();
@@ -465,6 +443,12 @@ int main()
     fh.print();
     fh.delete_min();
     fh.print();
+    fh.decrease_key(300,150);
+    fh.print();
     fh.delete_min();
     fh.print();
+    // cout<<"\n"<<fh.find_deg(40);
+    // cout<<"\n"<<fh.find_deg(120);
+    // cout<<"\n"<<fh.find_min();
+    // cout<<"\n"<<fh.find_num();
 }
